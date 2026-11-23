@@ -8,10 +8,6 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::prefix('api/v1')->group(function () {
-    Route::post('/auth/login', [UserApiController::class, 'login']);
-});
-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

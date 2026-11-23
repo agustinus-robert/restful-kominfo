@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use RuntimeException;
 
 class MeetingSeeder extends Seeder
@@ -55,51 +56,46 @@ class MeetingSeeder extends Seeder
             $roomIds = Room::whereIn(
                 'name',
                 array_column($rooms, 'name')
-            )
-            ->where('is_active', true)
-            ->pluck('id');
-
-            $userIds = User::pluck('id');
-
-            if ($userIds->isEmpty()) {
-                throw new RuntimeException(
-                    'Users belum tersedia. Jalankan UserSeeder terlebih dahulu.'
-                );
-            }
-
-            $bookings = [
-                [
-                    'title' => 'Rapat koordinasi mingguan',
-                    'start_time' => '2026-11-24T02:00:00Z',
-                    'end_time' => '2026-11-24T03:00:00Z',
-                    'status' => 'CONFIRMED',
-                ],
-                [
-                    'title' => 'Rapat koordinasi bulanan',
-                    'start_time' => '2026-11-25T02:00:00Z',
-                    'end_time' => '2026-11-25T04:00:00Z',
-                    'status' => 'CONFIRMED',
-                ],
-                [
-                    'title' => 'Pembahasan Proyek',
-                    'start_time' => '2026-11-24T04:00:00Z',
-                    'end_time' => '2026-11-24T05:30:00Z',
-                    'status' => 'CANCELLED',
-                ],
-            ];
+            )->pluck('id');
 
             if ($roomIds->isEmpty()) {
                 throw new RuntimeException(
-                    'Tidak ada ruangan aktif untuk booking.'
+                    'Ruangan belum tersedia.'
                 );
             }
 
             $admin = User::where('role', 'ADMIN')->firstOrFail();
+            $today = Carbon::today('Asia/Jakarta');
+
+            $bookings = [
+                [
+                    'title' => 'Rapat koordinasi mingguan',
+                    'room_id' => $roomIds[0],
+                    'start_time' => $today->copy()->setTime(9, 0),
+                    'end_time' => $today->copy()->setTime(10, 0),
+                    'status' => 'CONFIRMED',
+                ],
+                [
+                    'title' => 'Rapat koordinasi bulanan',
+                    'room_id' => $roomIds[1],
+                    'start_time' => $today->copy()->setTime(13, 0),
+                    'end_time' => $today->copy()->setTime(16, 0),
+                    'status' => 'CONFIRMED',
+                ],
+                [
+                    'title' => 'Pembahasan Proyek',
+                    'room_id' => $roomIds[2],
+                    'start_time' => $today->copy()->setTime(8, 0),
+                    'end_time' => $today->copy()->setTime(12, 0),
+                    'status' => 'CONFIRMED',
+                ],
+            ];
+
             foreach ($bookings as $booking) {
                 Booking::withTrashed()->updateOrCreate(
                     ['title' => $booking['title']],
                     [
-                        'room_id' => $roomIds->random(),
+                        'room_id' => $booking['room_id'],
                         'user_id' => $admin->id,
                         'start_time' => $booking['start_time'],
                         'end_time' => $booking['end_time'],

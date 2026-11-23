@@ -10,22 +10,34 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password_hash' => Hash::make('password'),
-            'role' => 'ADMIN'
-        ]);
+        $users = [
+            [
+                'name' => 'Administrator',
+                'email' => 'admin@test.com',
+                'password_hash' => Hash::make('password123'),
+                'role' => 'ADMIN',
+            ],
+            [
+                'name' => 'User Satu',
+                'email' => 'user1@test.com',
+                'password_hash' => Hash::make('password123'),
+                'role' => 'USER',
+            ],
+            [
+                'name' => 'User Dua',
+                'email' => 'user2@test.com',
+                'password_hash' => Hash::make('password123'),
+                'role' => 'USER',
+            ],
+        ];
 
-        echo "Admin dibuat: {$admin->name} ({$admin->email})\n";
+        foreach ($users as $userData) {
+            $user = User::updateOrCreate(
+                ['email' => $userData['email']],
+                $userData
+            );
 
-        $users = User::factory(10)->create([
-            'password_hash' => Hash::make('password'),
-            'role' => 'USER'
-        ]);
-
-        foreach ($users as $user) {
-            echo "Pengguna Biasa dibuat: {$user->name} ({$user->email})\n";
+            echo "User dibuat: {$user->name} ({$user->email}) - {$user->role}\n";
         }
     }
 }
